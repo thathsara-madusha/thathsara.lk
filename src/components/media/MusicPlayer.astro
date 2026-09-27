@@ -19,8 +19,6 @@ const tracks = await getMusicTracks();
       id="music-toggle"
       class="music-btn"
       aria-label="Play background music"
-      aria-expanded="false"
-      aria-controls="music-secondary-controls"
     >
       <svg
         class="icon-play"
@@ -41,7 +39,7 @@ const tracks = await getMusicTracks();
       </svg>
       <Loader hidden />
     </button>
-    <div class="music-secondary" id="music-secondary-controls">
+    <div class="music-secondary">
       <button
         id="music-next"
         class="music-btn music-next"
@@ -70,15 +68,6 @@ const tracks = await getMusicTracks();
           <kbd>[</kbd><kbd>]</kbd>
         </span>
       </div>
-      <button
-        id="music-dismiss"
-        class="music-btn music-dismiss"
-        aria-label="Hide music player for this visit"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-          <path d="M6 6l12 12M18 6 6 18"></path>
-        </svg>
-      </button>
     </div>
   </div>
   <!-- preload="none" ensures we don't download audio during initial load, preserving Lighthouse performance scores -->
@@ -98,7 +87,7 @@ const tracks = await getMusicTracks();
   }
 
   .music-info {
-    display: none;
+    display: flex;
     flex-direction: column;
     align-items: flex-end;
     color: var(--color-text, #fff);
@@ -123,16 +112,9 @@ const tracks = await getMusicTracks();
   }
 
   .music-secondary {
-    display: none;
+    display: flex;
     align-items: center;
     gap: 0.5rem;
-  }
-
-  .music-panel.is-expanded {
-    .music-info,
-    .music-secondary {
-      display: flex;
-    }
   }
 
   .music-btn {
@@ -184,23 +166,11 @@ const tracks = await getMusicTracks();
   }
 
   .music-next {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2rem;
+    height: 2rem;
     svg {
-      width: 1.2rem;
-      height: 1.2rem;
-    }
-  }
-
-  .music-dismiss {
-    width: 2.75rem;
-    height: 2.75rem;
-
-    svg {
-      width: 1.1rem;
-      height: 1.1rem;
-      stroke-width: 1.75;
-      stroke-linecap: round;
+      width: 1rem;
+      height: 1rem;
     }
   }
 
@@ -333,7 +303,6 @@ const tracks = await getMusicTracks();
   import { announcePlayback } from "@/lib/mediaCoordinator";
 
   const VOLUME_STEP = 0.1;
-  const MUSIC_DISMISSED_KEY = "music-player-dismissed-for-session";
   const NON_TEXT_INPUT_TYPES = new Set([
     "range",
     "checkbox",
@@ -361,7 +330,6 @@ const tracks = await getMusicTracks();
     panel: HTMLElement;
     btn: HTMLButtonElement;
     nextBtn: HTMLButtonElement;
-    dismissBtn: HTMLButtonElement;
     audio: DashAudio;
     iconPlay: HTMLElement;
     iconPause: HTMLElement;
@@ -383,7 +351,6 @@ const tracks = await getMusicTracks();
       this.panel = panel;
       this.btn = panel.querySelector<HTMLButtonElement>("#music-toggle")!;
       this.nextBtn = panel.querySelector<HTMLButtonElement>("#music-next")!;
-      this.dismissBtn = panel.querySelector<HTMLButtonElement>("#music-dismiss")!;
       this.audio = panel.querySelector("#bg-audio");
       this.iconPlay = this.btn.querySelector<HTMLElement>(".icon-play")!;
       this.iconPause = this.btn.querySelector<HTMLElement>(".icon-pause")!;
@@ -426,7 +393,6 @@ const tracks = await getMusicTracks();
     bindEvents() {
       this.btn.addEventListener("click", () => this.toggle());
       this.nextBtn.addEventListener("click", () => this.playNext());
-      this.dismissBtn.addEventListener("click", () => this.dismiss());
       this.audio.addEventListener("ended", () => this.playNext());
 
       this.volumeSlider.addEventListener("input", (e) => {
@@ -510,7 +476,6 @@ const tracks = await getMusicTracks();
         return;
       }
       if (!this.isTrackLoaded && this.tracks.length > 0) {
-        this.expand();
         this.isLoading = true;
         this.updateUI();
         await this.loadTrack(this.tracks[this.currentTrackIndex]);
@@ -527,7 +492,6 @@ const tracks = await getMusicTracks();
 
     async playNext() {
       if (this.tracks.length === 0) return;
-      this.expand();
       this.currentTrackIndex =
         (this.currentTrackIndex + 1) % this.tracks.length;
       const track = this.tracks[this.currentTrackIndex];
@@ -561,22 +525,6 @@ const tracks = await getMusicTracks();
         "aria-label",
         this.isPlaying ? "Pause background music" : "Play background music",
       );
-      if (this.isPlaying) this.expand();
-    }
-
-    expand() {
-      this.panel.classList.add("is-expanded");
-      this.btn.setAttribute("aria-expanded", "true");
-    }
-
-    dismiss() {
-      this.audio.pause();
-      try {
-        sessionStorage.setItem(MUSIC_DISMISSED_KEY, "true");
-      } catch {
-        // The player still dismisses for the current page if storage is unavailable.
-      }
-      this.panel.style.display = "none";
     }
 
     handleScroll() {
@@ -613,11 +561,6 @@ const tracks = await getMusicTracks();
 
   function setupPlayer() {
     if (!musicPlayer.get()) return;
-    try {
-      if (sessionStorage.getItem(MUSIC_DISMISSED_KEY) === "true") return;
-    } catch {
-      // Continue when session storage is unavailable.
-    }
     const panel = getPanel();
     if (!panel) return;
     panel.style.display = "flex";
@@ -644,11 +587,6 @@ const tracks = await getMusicTracks();
       panel.style.display = "none";
       (document.getElementById("bg-audio") as HTMLMediaElement | null)?.pause();
     } else {
-      try {
-        sessionStorage.removeItem(MUSIC_DISMISSED_KEY);
-      } catch {
-        // Showing the player does not depend on storage.
-      }
       panel.style.display = "flex";
       if (!controllers.has(panel)) {
         controllers.set(panel, new MusicController(panel));
