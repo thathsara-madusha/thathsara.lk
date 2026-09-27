@@ -11,24 +11,21 @@
     "download-video": "node npm-run/download-video.js",
     "mov-to-mp4": "node npm-run/mov-to-mp4.js",
     "extract-thumbnail": "node npm-run/extract-thumbnail.js",
-    "generate-og": "node npm-run/generate-og.js",
     "purge-cache": "node npm-run/purge-cloudflare-cache.js",
     "upgrade-deps": "pnpm dlx npm-check-updates -u && pnpm install"
   },
   "dependencies": {
-    "@astrojs/mdx": "^8.0.0",
+    "@astrojs/mdx": "^8.0.2",
     "@astrojs/sitemap": "^3.7.4",
-    "@astrojs/svelte": "^9.0.1",
     "@lottiefiles/dotlottie-web": "^0.80.0",
-    "astro": "^7.3.1",
-    "svelte": "^5.57.0",
+    "astro": "^7.3.5",
     "typescript": "^7.0.2"
   },
   "devDependencies": {
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.3",
     "listr2": "^11.1.0",
-    "music-metadata": "^11.15.0",
+    "music-metadata": "^11.16.1",
     "node-id3": "^0.2.9",
-    "sass": "^1.104.0"
+    "sass": "^1.105.0"
   }
 }

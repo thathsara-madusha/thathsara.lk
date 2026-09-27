@@ -3,13 +3,11 @@ import sitemap from "@astrojs/sitemap";
 
 import mdx from "@astrojs/mdx";
 
-import svelte from "@astrojs/svelte";
-
 export default defineConfig({
   site: "https://thathsara.lk",
   trailingSlash: "always",
   devToolbar: { enabled: false },
-  integrations: [sitemap(), mdx(), svelte()],
+  integrations: [sitemap(), mdx()],
   fonts: [
     {
       provider: fontProviders.google(),
