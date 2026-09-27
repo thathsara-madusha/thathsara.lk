@@ -6,29 +6,61 @@ import { siteConfig } from "@/lib/site";
 import { getAllPosts, toDateLabel } from "@/lib/utils";
 
 const posts = await getAllPosts();
-const featuredPosts = posts.filter((p) => p.data.featured);
-const rest = posts.filter((p) => !p.data.featured);
+const featured = posts.find((post) => post.data.featured);
+const rest = featured ? posts.filter((post) => post.id !== featured.id) : posts;
+const featuredReadMinutes = featured
+  ? Math.max(1, Math.round((featured.body?.split(/\s+/).length ?? 0) / 200))
+  : 0;
+const featuredSearchText = featured
+  ? [featured.data.title, featured.data.excerpt, ...(featured.data.tags ?? [])]
+      .join(" ")
+      .toLowerCase()
+  : "";
 ---
 
 <BaseLayout description={siteConfig.description}>
-  {featuredPosts.map((featured) => (
-    <section class="hero">
-      <div class="label-tag">
-        Featured Dispatch
-        <UnreadBadge postId={featured.id} />
-      </div>
-      <h1 class="hero-title"><a href={`/posts/${featured.id}/`}>{featured.data.title}</a></h1>
+  <p id="search-results-status" class="search-results-status" aria-live="polite" hidden></p>
+
+  {featured && (
+    <section
+      class="hero"
+      data-search-item
+      data-search-kind="featured"
+      data-search={featuredSearchText}
+      aria-labelledby="featured-title"
+    >
+      <h1 class="hero-title" id="featured-title">
+        <a href={`/posts/${featured.id}/`}>{featured.data.title}</a>
+      </h1>
       {featured.data.excerpt && (
         <p class="hero-excerpt">{featured.data.excerpt}</p>
       )}
+      <div class="hero-meta">
+        <span>Featured dispatch</span>
+        <span aria-hidden="true">·</span>
+        <time datetime={featured.data.date.toISOString()}>{toDateLabel(featured.data.date)}</time>
+        <span aria-hidden="true">·</span>
+        <span>{featuredReadMinutes} min read</span>
+        <UnreadBadge postId={featured.id} />
+      </div>
     </section>
-  ))}
+  )}
 
-  <div class="section-hd">
-    <hr />
-    <span class="section-lbl">All Dispatches</span>
-    <hr />
-  </div>
+  <section class="dispatch-list" data-search-group aria-labelledby="dispatches-title">
+    <div class="section-hd">
+      <hr />
+      <h2 class="section-lbl" id="dispatches-title">All Dispatches</h2>
+      <hr />
+    </div>
 
-  {rest.map((post) => <PostCard post={post} />)}
+    <div class="post-list">
+      {rest.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+
+  <section class="search-empty" id="search-empty" aria-live="polite" hidden>
+    <h2>No dispatches found</h2>
+    <p>Try another word, browse the tags, or clear the search to see everything again.</p>
+    <button type="button" id="search-reset">Clear search</button>
+  </section>
 </BaseLayout>

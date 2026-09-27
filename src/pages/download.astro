@@ -188,7 +188,6 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     color: var(--color-ink);
     font-size: 0.95rem;
     font-family: var(--font-ui, monospace);
-    outline: none;
     transition: border-color 0.15s;
     min-width: 0;
 
@@ -196,8 +195,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       color: var(--color-ink-light);
     }
 
-    &:focus {
-      border-color: var(--color-gold);
+    &:focus-visible {
+      border-color: var(--color-focus);
+      outline: 3px solid var(--color-focus);
+      outline-offset: 2px;
     }
   }
 

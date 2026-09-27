@@ -1,13 +1,11 @@
 ---
 import { siteConfig } from "@/lib/site";
-import packageJson from "../../package.json";
 import "../styles/main.scss";
 import HeadMeta from "@/components/HeadMeta.astro";
 import Analytics from "@/components/Analytics.astro";
 import Navigation from "@/components/nav/Navigation.astro";
 import ReaderState from "@/components/reader/ReaderState.astro";
 import MusicPlayer from "@/components/media/MusicPlayer.astro";
-import RetroCounter from "@/components/Counter.astro";
 import { ClientRouter } from "astro:transitions";
 import GitHubIcon from "@/components/icons/GitHubIcon.astro";
 import InstagramIcon from "@/components/icons/InstagramIcon.astro";
@@ -27,7 +25,7 @@ const pageDescription = description ?? siteConfig.description;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const siteURL = Astro.site ? new URL("/", Astro.site) : new URL("/", canonicalURL);
 const socialImageURL = new URL(image, siteURL);
-const themeColor = accentColor ?? "#b8882a";
+const themeColor = accentColor ?? "#8f6614";
 const currentYear = new Date().getFullYear();
 const structuredData = {
   "@context": "https://schema.org",
@@ -62,6 +60,7 @@ const structuredData = {
       siteURL={siteURL}
       socialImageURL={socialImageURL}
       themeColor={themeColor}
+      darkThemeColor="#080d17"
       structuredData={structuredData}
     />
     <Analytics spa />
@@ -75,8 +74,10 @@ const structuredData = {
         position: fixed;
         top: 0;
         left: 0;
+        width: 100%;
         height: 2px;
         background-color: var(--color-gold, #b8882a);
+        transform-origin: left;
         z-index: 99999;
         pointer-events: none;
       }
@@ -88,15 +89,23 @@ const structuredData = {
         animation: route-loaded 0.4s ease-out forwards;
       }
       @keyframes route-loading {
-        0%   { width: 0%; }
-        10%  { width: 20%; }
-        50%  { width: 50%; }
-        100% { width: 80%; }
+        0%   { transform: scaleX(0); }
+        10%  { transform: scaleX(0.2); }
+        50%  { transform: scaleX(0.5); }
+        100% { transform: scaleX(0.8); }
       }
       @keyframes route-loaded {
-        0%   { width: 80%; opacity: 1; }
-        50%  { width: 100%; opacity: 1; }
-        100% { width: 100%; opacity: 0; }
+        0%   { transform: scaleX(0.8); opacity: 1; }
+        50%  { transform: scaleX(1); opacity: 1; }
+        100% { transform: scaleX(1); opacity: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html.is-loading body::before,
+        html.is-loaded body::before {
+          animation: none;
+        }
+        html.is-loading body::before { transform: scaleX(0.8); }
+        html.is-loaded body::before { opacity: 0; }
       }
     </style>
 
@@ -165,9 +174,7 @@ const structuredData = {
         &nbsp;·&nbsp; dispatches from the edge
         &nbsp;·&nbsp; {currentYear}
         &nbsp;·&nbsp; <a href="/settings/">Settings</a>
-        &nbsp;·&nbsp; <a href="https://astro.build" target="_blank">Astro</a>
-        &nbsp;·&nbsp; v{packageJson.version}
-        &nbsp;·&nbsp; <RetroCounter />
+        &nbsp;·&nbsp; <a href="/about/">About the author</a>
       </div>
     </footer>
 

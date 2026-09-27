@@ -76,7 +76,8 @@ $hue-cool: 220;
   --color-ink-light: #{cool(48%, 22%)};
 
   // Accents.
-  --color-gold: #{warm(48%, 72%)};
+  --color-gold: #{warm(32%, 75%)};
+  --color-focus: #{cool(28%, 72%)};
   --color-red: #{hsl(0, 70%, 38%)};
 
   // Aliases for existing code compatibility
@@ -97,7 +98,7 @@ $hue-cool: 220;
   // Layout
   --content-max-width: 760px;
   --content-padding: 2rem;
-  --content-padding-mobile: 0.7rem;
+  --content-padding-mobile: 1.15rem;
   --border-radius: 5px;
   --font-size-base: 18px;
   --line-height-base: 1.75;
@@ -118,6 +119,7 @@ $hue-cool: 220;
 
     // Accents.
     --color-gold: #{warm(58%, 75%)};
+    --color-focus: #{warm(68%, 85%)};
     --color-red: #{hsl(0, 75%, 62%)};
   }
 }
@@ -136,16 +138,6 @@ $hue-cool: 220;
 ::selection {
   background: var(--color-gold);
   color: var(--color-bg);
-}
-
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.6;
 }
 
 // =============================================================================
@@ -212,17 +204,33 @@ a {
 
   // Active/keyboard focus and hover styles. Use native selectors rather than
   // a local mixin so the states apply predictably across input methods.
-  &:is(:focus-visible, :active) {
+  &:active {
     @include gold-link;
     background-color: transparent;
-    outline: none;
   }
 
   @include hover {
     @include gold-link;
     background-color: transparent;
-    outline: none;
   }
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 ul {
@@ -349,12 +357,15 @@ figure {
 }
 
 .section-lbl {
-  @include caps(9px, 0.35em);
+  @include caps(11px, 0.28em);
   white-space: nowrap;
+  font-weight: 600;
+  font-style: normal;
+  margin: 0;
 }
 
 .label-tag {
-  @include caps(9px, 0.35em, var(--color-red));
+  @include caps(11px, 0.28em, var(--color-red));
   margin-bottom: 1.25rem;
   display: flex;
   flex-wrap: wrap;
@@ -442,9 +453,57 @@ figure {
   line-height: 1.7;
   font-style: italic;
   margin-bottom: 2rem;
-  border-left: 2px solid var(--color-gold);
-  padding-left: 1.25rem;
-  max-width: 580px;
+}
+
+.hero-meta {
+  @include ui(11px, 0.08em, var(--color-ink-mid));
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.25rem;
+}
+
+.search-results-status {
+  @include ui(12px, 0.08em, var(--color-ink-mid));
+  border-block: 1px solid var(--color-rule);
+  padding: 0.8rem 0;
+  margin: 0 0 2rem;
+
+  &[hidden] { display: none; }
+}
+
+.dispatch-list[hidden],
+.search-empty[hidden],
+[data-search-item][hidden] {
+  display: none;
+}
+
+.post-list {
+  display: grid;
+}
+
+.search-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+
+  h2 { margin-bottom: 0.5rem; }
+  p {
+    max-width: 30rem;
+    margin: 0 auto 1.5rem;
+    color: var(--color-ink-mid);
+  }
+  button {
+    min-height: 44px;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-bg);
+    font: 600 0.75rem/1 var(--font-ui);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
 }
 
 // ── Post card ─────────────────────────────────────────────────────────────────
@@ -453,18 +512,13 @@ figure {
   padding: 2rem 0;
   border-bottom: 1px solid var(--color-rule);
   display: block;
-  text-decoration: none;
-  color: inherit;
-  transition: opacity 0.15s;
 
   @include mobile {
     padding: 1.25rem 0;
   }
 
   @include hover {
-    opacity: 0.85;
-    text-decoration: none;
-    .post-title {
+    .post-card-link .post-title {
       color: var(--color-gold);
     }
   }
@@ -479,13 +533,15 @@ figure {
 }
 
 .post-date {
-  @include ui(10px, 0.1em);
+  @include ui(11px, 0.08em);
 }
 
 .post-tag,
 .post-tag-inline {
-  @include caps(9px, 0.2em, var(--color-gold));
-  text-decoration: none;
+  @include caps(11px, 0.12em, var(--color-ink-mid));
+  text-decoration: underline;
+  text-decoration-color: var(--color-rule);
+  text-underline-offset: 0.2em;
 
   @include hover {
     color: var(--color-red);
@@ -494,8 +550,14 @@ figure {
 }
 
 .post-read-time {
-  @include ui(10px, 0.05em);
+  @include ui(11px, 0.05em);
   margin-left: auto;
+}
+
+.post-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 .post-title {
@@ -532,7 +594,7 @@ figure {
 }
 
 .tag-pill {
-  @include caps(10px, 0.2em, var(--color-ink-mid));
+  @include caps(11px, 0.16em, var(--color-ink-mid));
   padding: 8px 18px;
   border: 1px solid var(--color-rule);
   background: none;
@@ -554,6 +616,12 @@ figure {
     border-color: var(--color-ink);
     text-decoration: none;
   }
+}
+
+.tag-count {
+  margin-left: 0.3rem;
+  opacity: 0.75;
+  font-size: 11px;
 }
 
 // =============================================================================
@@ -760,7 +828,6 @@ figure {
   font-style: italic;
   font-size: 16px;
   color: var(--color-ink);
-  outline: none;
   transition: border-color 0.2s;
   border-radius: 0;
 
@@ -815,7 +882,7 @@ figure {
 }
 
 .soc {
-  @include caps(9px, 0.2em);
+  @include caps(11px, 0.16em);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -839,7 +906,7 @@ figure {
 }
 
 .footer-info {
-  @include ui(10px, 0.15em);
+  @include ui(11px, 0.1em);
   line-height: 1.8;
 
   a {
@@ -876,8 +943,7 @@ figure {
   }
 
   &:focus {
-    outline: none;
-    border-color: var(--color-gold);
+    border-color: var(--color-focus);
   }
 
   &:disabled {
@@ -908,8 +974,7 @@ figure {
   }
 
   &:focus {
-    outline: none;
-    border-color: var(--color-gold);
+    border-color: var(--color-focus);
   }
 
   &:disabled {

@@ -10,7 +10,7 @@ const tracks = await getMusicTracks();
   transition:persist="music-player"
   data-tracks={JSON.stringify(tracks)}
 >
-  <div class="music-info" id="music-info">
+  <div class="music-info" id="music-info" aria-live="polite">
     <span id="music-title" class="music-title"></span>
     <span id="music-artist" class="music-artist"></span>
   </div>
@@ -19,6 +19,8 @@ const tracks = await getMusicTracks();
       id="music-toggle"
       class="music-btn"
       aria-label="Play background music"
+      aria-expanded="false"
+      aria-controls="music-secondary-controls"
     >
       <svg
         class="icon-play"
@@ -39,33 +41,44 @@ const tracks = await getMusicTracks();
       </svg>
       <Loader hidden />
     </button>
-    <button
-      id="music-next"
-      class="music-btn music-next"
-      aria-label="Next track"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
+    <div class="music-secondary" id="music-secondary-controls">
+      <button
+        id="music-next"
+        class="music-btn music-next"
+        aria-label="Next track"
       >
-        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"></path>
-      </svg>
-    </button>
-    <div class="music-volume-wrap">
-      <input
-        id="music-volume"
-        class="music-volume"
-        type="range"
-        min="0"
-        max="100"
-        step="1"
-        value="100"
-        aria-label="Volume"
-      />
-      <span class="music-volume-hint" aria-hidden="true">
-        <kbd>[</kbd><kbd>]</kbd>
-      </span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"></path>
+        </svg>
+      </button>
+      <div class="music-volume-wrap">
+        <input
+          id="music-volume"
+          class="music-volume"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="100"
+          aria-label="Volume"
+        />
+        <span class="music-volume-hint" aria-hidden="true">
+          <kbd>[</kbd><kbd>]</kbd>
+        </span>
+      </div>
+      <button
+        id="music-dismiss"
+        class="music-btn music-dismiss"
+        aria-label="Hide music player for this visit"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18"></path>
+        </svg>
+      </button>
     </div>
   </div>
   <!-- preload="none" ensures we don't download audio during initial load, preserving Lighthouse performance scores -->
@@ -85,7 +98,7 @@ const tracks = await getMusicTracks();
   }
 
   .music-info {
-    display: flex;
+    display: none;
     flex-direction: column;
     align-items: flex-end;
     color: var(--color-text, #fff);
@@ -107,6 +120,19 @@ const tracks = await getMusicTracks();
     display: flex;
     gap: 0.5rem;
     align-items: center;
+  }
+
+  .music-secondary {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .music-panel.is-expanded {
+    .music-info,
+    .music-secondary {
+      display: flex;
+    }
   }
 
   .music-btn {
@@ -157,67 +183,24 @@ const tracks = await getMusicTracks();
     }
   }
 
-  .loader {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    position: relative;
-    animation: rotate 1s linear infinite;
-    flex-shrink: 0;
-
-    &::before,
-    &::after {
-      content: "";
-      box-sizing: border-box;
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 2px solid currentColor;
-      animation: prixClipFix 2s linear infinite;
-    }
-
-    &::after {
-      border-color: var(--color-primary);
-      animation:
-        prixClipFix 2s linear infinite,
-        rotate 0.5s linear infinite reverse;
-      inset: 3px;
-    }
-  }
-
-  @keyframes rotate {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-  @keyframes prixClipFix {
-    0% {
-      clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0);
-    }
-    25% {
-      clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0);
-    }
-    50% {
-      clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%);
-    }
-    75% {
-      clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 100%);
-    }
-    100% {
-      clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 0);
-    }
-  }
-
   .music-next {
-    width: 2rem;
-    height: 2rem;
+    width: 2.75rem;
+    height: 2.75rem;
     svg {
       width: 1.2rem;
       height: 1.2rem;
+    }
+  }
+
+  .music-dismiss {
+    width: 2.75rem;
+    height: 2.75rem;
+
+    svg {
+      width: 1.1rem;
+      height: 1.1rem;
+      stroke-width: 1.75;
+      stroke-linecap: round;
     }
   }
 
@@ -272,7 +255,6 @@ const tracks = await getMusicTracks();
     border-radius: 999px;
     background: var(--color-border, #444);
     cursor: pointer;
-    outline: none;
 
     &::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -334,6 +316,15 @@ const tracks = await getMusicTracks();
       }
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .music-panel,
+    .music-info,
+    .music-btn,
+    .music-volume-hint {
+      transition: none;
+    }
+  }
 </style>
 
 <script>
@@ -342,6 +333,7 @@ const tracks = await getMusicTracks();
   import { announcePlayback } from "@/lib/mediaCoordinator";
 
   const VOLUME_STEP = 0.1;
+  const MUSIC_DISMISSED_KEY = "music-player-dismissed-for-session";
   const NON_TEXT_INPUT_TYPES = new Set([
     "range",
     "checkbox",
@@ -369,6 +361,7 @@ const tracks = await getMusicTracks();
     panel: HTMLElement;
     btn: HTMLButtonElement;
     nextBtn: HTMLButtonElement;
+    dismissBtn: HTMLButtonElement;
     audio: DashAudio;
     iconPlay: HTMLElement;
     iconPause: HTMLElement;
@@ -390,6 +383,7 @@ const tracks = await getMusicTracks();
       this.panel = panel;
       this.btn = panel.querySelector<HTMLButtonElement>("#music-toggle")!;
       this.nextBtn = panel.querySelector<HTMLButtonElement>("#music-next")!;
+      this.dismissBtn = panel.querySelector<HTMLButtonElement>("#music-dismiss")!;
       this.audio = panel.querySelector("#bg-audio");
       this.iconPlay = this.btn.querySelector<HTMLElement>(".icon-play")!;
       this.iconPause = this.btn.querySelector<HTMLElement>(".icon-pause")!;
@@ -432,6 +426,7 @@ const tracks = await getMusicTracks();
     bindEvents() {
       this.btn.addEventListener("click", () => this.toggle());
       this.nextBtn.addEventListener("click", () => this.playNext());
+      this.dismissBtn.addEventListener("click", () => this.dismiss());
       this.audio.addEventListener("ended", () => this.playNext());
 
       this.volumeSlider.addEventListener("input", (e) => {
@@ -515,6 +510,7 @@ const tracks = await getMusicTracks();
         return;
       }
       if (!this.isTrackLoaded && this.tracks.length > 0) {
+        this.expand();
         this.isLoading = true;
         this.updateUI();
         await this.loadTrack(this.tracks[this.currentTrackIndex]);
@@ -531,6 +527,7 @@ const tracks = await getMusicTracks();
 
     async playNext() {
       if (this.tracks.length === 0) return;
+      this.expand();
       this.currentTrackIndex =
         (this.currentTrackIndex + 1) % this.tracks.length;
       const track = this.tracks[this.currentTrackIndex];
@@ -560,6 +557,26 @@ const tracks = await getMusicTracks();
       this.iconPlay.style.display = c.play;
       this.iconPause.style.display = c.pause;
       this.iconLoading.style.display = c.loader;
+      this.btn.setAttribute(
+        "aria-label",
+        this.isPlaying ? "Pause background music" : "Play background music",
+      );
+      if (this.isPlaying) this.expand();
+    }
+
+    expand() {
+      this.panel.classList.add("is-expanded");
+      this.btn.setAttribute("aria-expanded", "true");
+    }
+
+    dismiss() {
+      this.audio.pause();
+      try {
+        sessionStorage.setItem(MUSIC_DISMISSED_KEY, "true");
+      } catch {
+        // The player still dismisses for the current page if storage is unavailable.
+      }
+      this.panel.style.display = "none";
     }
 
     handleScroll() {
@@ -596,6 +613,11 @@ const tracks = await getMusicTracks();
 
   function setupPlayer() {
     if (!musicPlayer.get()) return;
+    try {
+      if (sessionStorage.getItem(MUSIC_DISMISSED_KEY) === "true") return;
+    } catch {
+      // Continue when session storage is unavailable.
+    }
     const panel = getPanel();
     if (!panel) return;
     panel.style.display = "flex";
@@ -622,6 +644,11 @@ const tracks = await getMusicTracks();
       panel.style.display = "none";
       (document.getElementById("bg-audio") as HTMLMediaElement | null)?.pause();
     } else {
+      try {
+        sessionStorage.removeItem(MUSIC_DISMISSED_KEY);
+      } catch {
+        // Showing the player does not depend on storage.
+      }
       panel.style.display = "flex";
       if (!controllers.has(panel)) {
         controllers.set(panel, new MusicController(panel));
