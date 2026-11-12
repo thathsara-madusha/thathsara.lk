@@ -15,17 +15,17 @@
     "upgrade-deps": "pnpm dlx npm-check-updates -u && pnpm install"
   },
   "dependencies": {
-    "@astrojs/mdx": "^8.1.1",
+    "@astrojs/mdx": "^8.1.4",
     "@astrojs/sitemap": "^3.7.4",
-    "@lottiefiles/dotlottie-web": "^0.81.0",
-    "astro": "^7.4.2",
+    "@lottiefiles/dotlottie-web": "^0.82.1",
+    "astro": "^7.4.10",
     "typescript": "^7.0.2"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
-    "listr2": "^11.4.0",
-    "music-metadata": "^12.2.3",
+    "@types/node": "^26.6.6",
+    "listr2": "^11.4.1",
+    "music-metadata": "^12.4.0",
     "node-id3": "^0.2.9",
-    "sass": "^1.106.1"
+    "sass": "^1.108.2"
   }
 }
