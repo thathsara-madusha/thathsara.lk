@@ -3,6 +3,7 @@ import { siteConfig } from "@/lib/site";
 import "../styles/main.scss";
 import HeadMeta from "@/components/HeadMeta.astro";
 import Analytics from "@/components/Analytics.astro";
+import Counter from "@/components/Counter.astro";
 import Navigation from "@/components/nav/Navigation.astro";
 import ReaderState from "@/components/reader/ReaderState.astro";
 import MusicPlayer from "@/components/media/MusicPlayer.astro";
@@ -175,6 +176,7 @@ const structuredData = {
         &nbsp;·&nbsp; {currentYear}
         &nbsp;·&nbsp; <a href="/settings/">Settings</a>
         &nbsp;·&nbsp; <a href="/about/">About the author</a>
+        &nbsp;·&nbsp; <Counter />
       </div>
     </footer>
 
